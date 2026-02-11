@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Finance Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">
+            <i class="fas fa-wallet"></i>
+            <h2>StudentFinance</h2>
+        </div>
+        <ul>
+            <li><a href="index.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="learn.html"><i class="fas fa-book-open"></i> Learn Finance</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <h1>My Dashboard</h1>
+            <p>Welcome back! Here is your financial summary.</p>
+        </header>
+
+        <div class="cards-container">
+            <div class="card income">
+                <h3>Total Income</h3>
+                <p id="displayIncome">$0.00</p>
+            </div>
+            <div class="card expense">
+                <h3>Total Expenses</h3>
+                <p id="displayExpense">$0.00</p>
+            </div>
+            <div class="card balance">
+                <h3>Balance</h3>
+                <p id="displayBalance">$0.00</p>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <section class="form-section">
+                <h3>Add New Transaction</h3>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="desc" placeholder="e.g. Scholarship, Pizza, Books" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="amount" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="type">
+                            <option value="income">Income (+)</option>
+                            <option value="expense">Expense (-)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Add Transaction</button>
+                </form>
+            </section>
+
+            <section class="chart-section">
+                <h3>Expense Analysis</h3>
+                <canvas id="expenseChart"></canvas>
+            </section>
+        </div>
+
+        <section class="history-section">
+            <h3>Recent History</h3>
+            <ul id="historyList" class="list">
+                </ul>
+        </section>
+
+        <section class="goal-section">
+            <h3>Savings Goal</h3>
+            <div class="goal-input">
+                <input type="text" id="goalName" placeholder="Goal Name (e.g. Laptop)">
+                <input type="number" id="goalAmount" placeholder="Target Amount">
+                <button onclick="setGoal()" class="btn-outline">Set Goal</button>
+            </div>
+            <div class="progress-container">
+                <p>Progress for: <span id="goalLabel">None</span></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <small id="goalStatus">0% Reached</small>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
