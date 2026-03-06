@@ -1,99 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Finance Manager</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinTrack — Student Personal Finance Manager</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <canvas id="particle-canvas"></canvas>
+  <div class="grid-bg"></div>
+  <div class="noise"></div>
 
-    <nav class="sidebar">
-        <div class="brand">
-            <i class="fas fa-wallet"></i>
-            <h2>StudentFinance</h2>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="logo-icon">💎</div>
+      FinTrack
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="active"><span class="nav-icon">🏠</span> Home</a>
+      <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon">💸</span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon">🎯</span> Budget</a>
+      <a href="savings.html"><span class="nav-icon">🏦</span> Savings</a>
+      <a href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+      <a href="learn.html"><span class="nav-icon">🧠</span> Learn</a>
+    </div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn btn-primary btn-sm">Open App →</a>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
+    </div>
+  </nav>
+  <div class="mobile-nav-menu" id="mobile-nav-menu">
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="expenses.html">💸 Expenses</a>
+    <a href="budget.html">🎯 Budget</a>
+    <a href="savings.html">🏦 Savings</a>
+    <a href="reports.html">📈 Reports</a>
+    <a href="learn.html">🧠 Learn</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse"></span>
+          Built for Gen-Z Students · Free Forever
         </div>
-        <ul>
-            <li><a href="index.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="learn.html"><i class="fas fa-book-open"></i> Learn Finance</a></li>
-        </ul>
-    </nav>
-
-    <main class="main-content">
-        <header>
-            <h1>My Dashboard</h1>
-            <p>Welcome back! Here is your financial summary.</p>
-        </header>
-
-        <div class="cards-container">
-            <div class="card income">
-                <h3>Total Income</h3>
-                <p id="displayIncome">$0.00</p>
-            </div>
-            <div class="card expense">
-                <h3>Total Expenses</h3>
-                <p id="displayExpense">$0.00</p>
-            </div>
-            <div class="card balance">
-                <h3>Balance</h3>
-                <p id="displayBalance">$0.00</p>
-            </div>
+        <h1>
+          Take Control of<br>
+          <span class="gradient-text">Your Money.</span><br>
+          Build Your Future.
+        </h1>
+        <p>
+          FinTrack helps students manage pocket money, track expenses, set savings goals, and learn investing basics — all in one beautiful app. No more guessing where your money went.
+        </p>
+        <div class="hero-btns">
+          <a href="dashboard.html" class="btn btn-primary btn-lg">🚀 Get Started Free</a>
+          <a href="learn.html" class="btn btn-secondary btn-lg">🧠 Learn Finance</a>
         </div>
-
-        <div class="grid-container">
-            <section class="form-section">
-                <h3>Add New Transaction</h3>
-                <form id="transactionForm">
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" id="desc" placeholder="e.g. Scholarship, Pizza, Books" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Amount</label>
-                        <input type="number" id="amount" placeholder="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Type</label>
-                        <select id="type">
-                            <option value="income">Income (+)</option>
-                            <option value="expense">Expense (-)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn">Add Transaction</button>
-                </form>
-            </section>
-
-            <section class="chart-section">
-                <h3>Expense Analysis</h3>
-                <canvas id="expenseChart"></canvas>
-            </section>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-num" id="stat-savings">₹0</div>
+            <div class="hero-stat-label">Total Saved</div>
+          </div>
+          <div style="width:1px;background:var(--glass-border)"></div>
+          <div>
+            <div class="hero-stat-num" id="stat-goals">0</div>
+            <div class="hero-stat-label">Active Goals</div>
+          </div>
+          <div style="width:1px;background:var(--glass-border)"></div>
+          <div>
+            <div class="hero-stat-num" id="stat-expenses">₹0</div>
+            <div class="hero-stat-label">Tracked This Month</div>
+          </div>
         </div>
-
-        <section class="history-section">
-            <h3>Recent History</h3>
-            <ul id="historyList" class="list">
-                </ul>
-        </section>
-
-        <section class="goal-section">
-            <h3>Savings Goal</h3>
-            <div class="goal-input">
-                <input type="text" id="goalName" placeholder="Goal Name (e.g. Laptop)">
-                <input type="number" id="goalAmount" placeholder="Target Amount">
-                <button onclick="setGoal()" class="btn-outline">Set Goal</button>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-stack">
+          <!-- Main card -->
+          <div class="float-card main glass-card" style="animation:float 5s ease-in-out infinite">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+              <div>
+                <div class="card-label">Monthly Balance</div>
+                <div class="card-amount" id="hero-balance">₹2,650</div>
+              </div>
+              <div style="width:44px;height:44px;background:linear-gradient(135deg,#00d4ff,#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem">💎</div>
             </div>
-            <div class="progress-container">
-                <p>Progress for: <span id="goalLabel">None</span></p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <small id="goalStatus">0% Reached</small>
+            <div style="height:50px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:1rem;overflow:hidden;display:flex;align-items:flex-end;padding:6px 8px;gap:5px">
+              <div style="flex:1;height:60%;background:linear-gradient(180deg,#00d4ff,#0090cc);border-radius:3px;opacity:0.7"></div>
+              <div style="flex:1;height:85%;background:linear-gradient(180deg,#7c3aed,#5b21b6);border-radius:3px;opacity:0.7"></div>
+              <div style="flex:1;height:45%;background:linear-gradient(180deg,#ff006e,#aa0048);border-radius:3px;opacity:0.7"></div>
+              <div style="flex:1;height:70%;background:linear-gradient(180deg,#00ff88,#00aa55);border-radius:3px;opacity:0.7"></div>
+              <div style="flex:1;height:55%;background:linear-gradient(180deg,#ffd60a,#cc9900);border-radius:3px;opacity:0.7"></div>
             </div>
-        </section>
-    </main>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="badge badge-food">🍔 Food</span>
+              <span class="badge badge-travel">🚌 Travel</span>
+              <span class="badge badge-books">📚 Books</span>
+            </div>
+          </div>
+          <!-- Mini card 1 -->
+          <div class="float-card mini-1 glass-card">
+            <div class="card-label">Savings Goal</div>
+            <div class="mini-amount text-cyan">₹12,000</div>
+            <div style="margin-top:8px">
+              <div class="progress-track"><div class="progress-fill cyan" style="width:65%"></div></div>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">65% of ₹18,500</div>
+            </div>
+          </div>
+          <!-- Mini card 2 -->
+          <div class="float-card mini-2 glass-card">
+            <div class="card-label">This Month</div>
+            <div class="mini-amount" style="color:var(--pink)">₹2,350</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px">10 transactions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <script src="script.js"></script>
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="features-inner">
+      <div class="section-header observe-anim">
+        <div class="hero-badge" style="display:inline-flex;margin-bottom:1rem">✨ Everything You Need</div>
+        <h2>Smart Finance Tools for<br><span class="gradient-text">Smart Students</span></h2>
+        <p>Six powerful modules, one unified experience</p>
+      </div>
+      <div class="features-grid">
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon cyan">📊</div>
+          <h3>Live Dashboard</h3>
+          <p>Real-time overview of your budget, spending, income, and savings. Animated charts give you a crystal-clear financial picture at a glance.</p>
+        </div>
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon pink">💸</div>
+          <h3>Expense Tracker</h3>
+          <p>Log and categorize every rupee — food, travel, books, entertainment, stationery. Filter, sort, and search your transaction history instantly.</p>
+        </div>
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon purple">🎯</div>
+          <h3>Smart Budget</h3>
+          <p>Set monthly budgets per category. Visual progress bars warn you before you overspend. Your money, your rules.</p>
+        </div>
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon green">🏦</div>
+          <h3>Savings Goals</h3>
+          <p>Set targets for a laptop, fees, or a trip. Track progress, add to your savings, and celebrate when you hit your goal!</p>
+        </div>
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon yellow">📈</div>
+          <h3>Monthly Reports</h3>
+          <p>Detailed analytics with pie charts, bar graphs, and spending patterns. Export monthly summaries and understand your habits.</p>
+        </div>
+        <div class="glass-card feature-card observe-anim">
+          <div class="feature-icon orange">🧠</div>
+          <h3>Invest & Learn</h3>
+          <p>Beginner-friendly guides on mutual funds, SIPs, FDs, and stocks. Start your investment journey while still in college.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-padding" style="background:radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,212,255,0.05), transparent)">
+    <div style="max-width:1280px;margin:0 auto;padding:0 2rem">
+      <div class="section-header observe-anim">
+        <div class="hero-badge" style="display:inline-flex;margin-bottom:1rem">⚡ Simple 3-Step Process</div>
+        <h2>Get Started in <span class="gradient-text">Minutes</span></h2>
+      </div>
+      <div class="grid-3" style="max-width:900px;margin:0 auto">
+        <div class="glass-card card-p-lg observe-anim" style="text-align:center">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1.4rem;margin:0 auto 1.25rem;box-shadow:var(--shadow-glow-cyan)">1</div>
+          <h3 class="font-display mb-2" style="font-size:1.05rem;font-weight:700">Set Your Budget</h3>
+          <p class="text-sm" style="color:var(--text-secondary);line-height:1.7">Enter your monthly allowance, scholarship, or income. Allocate limits across categories.</p>
+        </div>
+        <div class="glass-card card-p-lg observe-anim delay-1" style="text-align:center">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1.4rem;margin:0 auto 1.25rem;box-shadow:var(--shadow-glow-purple)">2</div>
+          <h3 class="font-display mb-2" style="font-size:1.05rem;font-weight:700">Track Expenses</h3>
+          <p class="text-sm" style="color:var(--text-secondary);line-height:1.7">Log daily expenses in seconds. The app auto-calculates your remaining balance and alerts you.</p>
+        </div>
+        <div class="glass-card card-p-lg observe-anim delay-2" style="text-align:center">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--green),var(--cyan));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1.4rem;margin:0 auto 1.25rem;box-shadow:var(--shadow-glow-cyan)">3</div>
+          <h3 class="font-display mb-2" style="font-size:1.05rem;font-weight:700">Grow Your Savings</h3>
+          <p class="text-sm" style="color:var(--text-secondary);line-height:1.7">Set goals and watch progress. Learn investing basics to make your savings work harder.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div style="max-width:700px;margin:0 auto">
+      <h2>Ready to Master <span class="gradient-text">Your Finances?</span></h2>
+      <p>Join thousands of students building smart money habits today. Free, private, and works 100% in your browser.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="dashboard.html" class="btn btn-primary btn-lg" style="animation:glow-pulse 3s infinite">🚀 Launch Dashboard</a>
+        <a href="learn.html" class="btn btn-secondary btn-lg">📚 Learn Finance First</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid var(--glass-border);padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem;position:relative;z-index:1">
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0.75rem">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem">💎</div>
+      <span style="font-family:var(--font-display);font-weight:700;color:var(--text-secondary)">FinTrack</span>
+    </div>
+    <p>Student Personal Finance Manager · All data stored locally in your browser · 100% Private</p>
+    <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:1rem">
+      <a href="dashboard.html" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">Dashboard</a>
+      <a href="expenses.html" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">Expenses</a>
+      <a href="reports.html" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">Reports</a>
+      <a href="learn.html" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">Learn</a>
+    </div>
+  </footer>
+
+  
 </body>
 </html>
