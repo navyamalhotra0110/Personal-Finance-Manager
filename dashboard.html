@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FinTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="particle-canvas"></canvas>
+  <div class="grid-bg"></div>
+  <div class="noise"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">💎</div>FinTrack</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
+      <a href="dashboard.html" class="active"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon">💸</span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon">🎯</span> Budget</a>
+      <a href="savings.html"><span class="nav-icon">🏦</span> Savings</a>
+      <a href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+      <a href="learn.html"><span class="nav-icon">🧠</span> Learn</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-balance">Balance: <span id="nav-balance-val">₹—</span></div>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
+    </div>
+  </nav>
+  <div class="mobile-nav-menu" id="mobile-nav-menu">
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html" class="active">📊 Dashboard</a>
+    <a href="expenses.html">💸 Expenses</a>
+    <a href="budget.html">🎯 Budget</a>
+    <a href="savings.html">🏦 Savings</a>
+    <a href="reports.html">📈 Reports</a>
+    <a href="learn.html">🧠 Learn</a>
+  </div>
+
+  <div class="main-content">
+    <div class="page-container">
+
+      <!-- Header -->
+      <div class="page-header flex-between animate-in">
+        <div>
+          <h1>Good <span id="greeting-time" class="gradient-text">Morning</span><span id="greeting-name"></span> 👋</h1>
+          <p>Here's your financial overview for <span id="current-month-label"></span></p>
+        </div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <a href="expenses.html" class="btn btn-primary">+ Add Expense</a>
+          <button class="btn btn-secondary" onclick="openModal('income-modal')">💰 Add Income</button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-grid mb-4">
+        <div class="glass-card stat-card cyan animate-in">
+          <div class="glow-orb"></div>
+          <div class="stat-label">🎯 Monthly Budget</div>
+          <div class="stat-value" id="dash-budget-val">₹0</div>
+          <div class="stat-sub">Set in Budget page</div>
+        </div>
+        <div class="glass-card stat-card pink animate-in delay-1">
+          <div class="glow-orb"></div>
+          <div class="stat-label">💸 Total Spent</div>
+          <div class="stat-value" id="dash-spent-val">₹0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="glass-card stat-card green animate-in delay-2">
+          <div class="glow-orb"></div>
+          <div class="stat-label">💰 Remaining</div>
+          <div class="stat-value" id="dash-balance-val">₹0</div>
+          <div class="stat-sub">Budget left</div>
+        </div>
+        <div class="glass-card stat-card purple animate-in delay-3">
+          <div class="glow-orb"></div>
+          <div class="stat-label">📥 Income</div>
+          <div class="stat-value" id="dash-income-val">₹0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="glass-card stat-card yellow animate-in delay-4">
+          <div class="glow-orb"></div>
+          <div class="stat-label">🏦 Est. Savings</div>
+          <div class="stat-value" id="dash-savings-val">₹0</div>
+          <div class="stat-sub">Budget + Income – Spent</div>
+        </div>
+      </div>
+
+      <!-- Budget Progress Bar -->
+      <div class="glass-card card-p mb-4 animate-in delay-2">
+        <div class="flex-between mb-2">
+          <div class="section-title" style="margin-bottom:0">
+            <div class="title-accent"></div>
+            Overall Budget Usage
+          </div>
+          <span id="dash-budget-pct" class="text-cyan font-bold font-display" style="font-size:1.1rem">0%</span>
+        </div>
+        <div class="progress-track" style="height:12px">
+          <div class="progress-fill cyan" id="dash-budget-progress" style="width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.78rem;color:var(--text-muted)">
+          <span>Spent: <span class="text-pink font-bold" id="prog-spent">₹0</span></span>
+          <span>Budget: <span class="text-cyan font-bold" id="prog-budget">₹0</span></span>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid-2 mb-4">
+
+        <!-- Category Breakdown -->
+        <div class="glass-card card-p animate-in">
+          <div class="section-title">
+            <div class="title-accent"></div>
+            Spending by Category
+          </div>
+          <div id="dash-cat-list" class="budget-category-list"></div>
+        </div>
+
+        <!-- Donut Chart -->
+        <div class="glass-card card-p animate-in delay-1">
+          <div class="section-title">
+            <div class="title-accent"></div>
+            Expense Distribution
+          </div>
+          <div class="chart-wrap" style="max-height:320px;display:flex;align-items:center;justify-content:center">
+            <canvas id="dash-donut"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Add Expense -->
+      <div class="glass-card card-p mb-4 animate-in">
+        <div class="section-title">
+          <div class="title-accent"></div>
+          Quick Add Expense
+        </div>
+        <form id="quick-expense-form">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:0.75rem;align-items:end">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Description</label>
+              <input name="description" class="form-control" placeholder="e.g. Canteen lunch" />
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Amount (₹)</label>
+              <input name="amount" type="number" class="form-control" placeholder="0" min="1" required />
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Category</label>
+              <select name="category" class="form-control">
+                <option value="food">🍔 Food</option>
+                <option value="travel">🚌 Travel</option>
+                <option value="books">📚 Books</option>
+                <option value="entertainment">🎮 Entertainment</option>
+                <option value="stationery">✏️ Stationery</option>
+                <option value="other">📦 Other</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Date</label>
+              <input name="date" type="date" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:44px;white-space:nowrap">+ Add</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="glass-card animate-in">
+        <div style="padding:1.5rem 1.5rem 1rem;display:flex;align-items:center;justify-content:space-between">
+          <div class="section-title" style="margin:0">
+            <div class="title-accent"></div>
+            Recent Transactions
+          </div>
+          <a href="expenses.html" class="btn btn-secondary btn-sm">View All →</a>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table w-full">
+            <thead>
+              <tr>
+                <th>Description</th><th>Category</th><th>Date</th>
+                <th class="text-right">Amount</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="recent-list"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Income Modal -->
+  <div class="modal-overlay" id="income-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">💰 Add Income</h2>
+        <button class="modal-close" onclick="closeModal('income-modal')">✕</button>
+      </div>
+      <form id="income-form">
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <input name="source" class="form-control" placeholder="e.g. Pocket Money, Scholarship" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input name="amount" type="number" class="form-control" placeholder="0" min="1" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input name="date" type="date" class="form-control" id="inc-date" />
+          </div>
+        </div>
+        <div style="margin-top:0.5rem;margin-bottom:1.5rem">
+          <div class="section-title" style="margin-bottom:0.75rem"><div class="title-accent"></div>Income History</div>
+          <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
+            <table class="data-table w-full">
+              <thead><tr><th>Source</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+              <tbody id="income-list"></tbody>
+            </table>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Add Income</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Greeting & date
+    const hour = new Date().getHours();
+    const greetEl = document.getElementById('greeting-time');
+    if (greetEl) greetEl.textContent = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+    const monthLabel = document.getElementById('current-month-label');
+    if (monthLabel) {
+      const d = new Date();
+      monthLabel.textContent = d.toLocaleString('en-IN', { month: 'long', year: 'numeric' });
+    }
+    // Set default date for quick form
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInputs = document.querySelectorAll('input[type="date"]');
+      dateInputs.forEach(inp => { if (!inp.value) inp.value = new Date().toISOString().split('T')[0]; });
+      // Update prog labels
+      const updateProgs = () => {
+        const bud = JSON.parse(localStorage.getItem('ft_budget') || '{"total":5000}');
+        const expenses = JSON.parse(localStorage.getItem('ft_expenses') || '[]');
+        const now = new Date();
+        const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const spent = expenses.filter(e=>e.date&&e.date.startsWith(month)).reduce((s,e)=>s+(+e.amount),0);
+        const ps = document.getElementById('prog-spent');
+        const pb = document.getElementById('prog-budget');
+        if (ps) ps.textContent = '₹' + spent.toLocaleString('en-IN');
+        if (pb) pb.textContent = '₹' + (bud.total||0).toLocaleString('en-IN');
+      };
+      updateProgs();
+    });
+  </script>
+</body>
+</html>
