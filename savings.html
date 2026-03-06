@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Savings Goals — FinTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="particle-canvas"></canvas>
+  <div class="grid-bg"></div>
+  <div class="noise"></div>
+
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">💎</div>FinTrack</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
+      <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon">💸</span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon">🎯</span> Budget</a>
+      <a href="savings.html" class="active"><span class="nav-icon">🏦</span> Savings</a>
+      <a href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+      <a href="learn.html"><span class="nav-icon">🧠</span> Learn</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-balance">Balance: <span id="nav-balance-val">₹—</span></div>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
+    </div>
+  </nav>
+  <div class="mobile-nav-menu" id="mobile-nav-menu">
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="expenses.html">💸 Expenses</a>
+    <a href="budget.html">🎯 Budget</a>
+    <a href="savings.html" class="active">🏦 Savings</a>
+    <a href="reports.html">📈 Reports</a>
+    <a href="learn.html">🧠 Learn</a>
+  </div>
+
+  <div class="main-content">
+    <div class="page-container">
+
+      <div class="page-header flex-between animate-in">
+        <div>
+          <h1>🏦 <span class="gradient-text">Savings</span> Goals</h1>
+          <p>Set targets, track progress, and build your financial future</p>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="openModal('goal-modal')">+ New Goal</button>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="stat-grid mb-4">
+        <div class="glass-card stat-card cyan animate-in">
+          <div class="glow-orb"></div>
+          <div class="stat-label">🎯 Active Goals</div>
+          <div class="stat-value" id="goals-count">0</div>
+          <div class="stat-sub">Currently tracking</div>
+        </div>
+        <div class="glass-card stat-card green animate-in delay-1">
+          <div class="glow-orb"></div>
+          <div class="stat-label">💰 Total Saved</div>
+          <div class="stat-value" id="goals-total-saved">₹0</div>
+          <div class="stat-sub">Across all goals</div>
+        </div>
+        <div class="glass-card stat-card purple animate-in delay-2">
+          <div class="glow-orb"></div>
+          <div class="stat-label">🏁 Total Target</div>
+          <div class="stat-value" id="goals-total-target">₹0</div>
+          <div class="stat-sub">Combined goal amount</div>
+        </div>
+      </div>
+
+      <!-- Goals Grid -->
+      <div id="goals-grid" class="grid-auto mb-4"></div>
+
+      <!-- Savings Tips -->
+      <div class="glass-card card-p animate-in delay-3">
+        <div class="section-title"><div class="title-accent"></div>🌟 Smart Savings Strategies</div>
+        <div class="grid-3">
+          <div class="tip-card">
+            <strong>Pay Yourself First 💪</strong><br>
+            Transfer a fixed amount to savings on the day you receive money — before spending anything.
+          </div>
+          <div class="tip-card">
+            <strong>SIP Mindset 📈</strong><br>
+            Even ₹500/month invested in a mutual fund SIP can grow to ₹3.5 lakhs in 20 years at 12% returns.
+          </div>
+          <div class="tip-card">
+            <strong>Emergency Fund 🛡️</strong><br>
+            Build a 3-month expense cushion. It protects you from unexpected costs without touching other goals.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- New Goal Modal -->
+  <div class="modal-overlay" id="goal-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">🎯 New Savings Goal</h2>
+        <button class="modal-close" onclick="closeModal('goal-modal')">✕</button>
+      </div>
+      <form id="goal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Goal Name *</label>
+            <input name="name" class="form-control" placeholder="e.g. New Laptop" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Emoji Icon</label>
+            <input name="emoji" class="form-control" placeholder="💻 🎓 ✈️ 🏔️" maxlength="4" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Target Amount (₹) *</label>
+            <input name="target" type="number" class="form-control" placeholder="50000" min="1" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deadline (optional)</label>
+            <input name="deadline" type="date" class="form-control" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color Theme</label>
+          <select name="color" class="form-control">
+            <option value="cyan">Cyan</option>
+            <option value="purple">Purple</option>
+            <option value="green">Green</option>
+            <option value="pink">Pink</option>
+            <option value="yellow">Yellow</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-full btn-lg">Create Goal 🚀</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
