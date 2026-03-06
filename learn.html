@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Finance — FinTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="particle-canvas"></canvas>
+  <div class="grid-bg"></div>
+  <div class="noise"></div>
+
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">💎</div>FinTrack</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
+      <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon">💸</span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon">🎯</span> Budget</a>
+      <a href="savings.html"><span class="nav-icon">🏦</span> Savings</a>
+      <a href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+      <a href="learn.html" class="active"><span class="nav-icon">🧠</span> Learn</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-balance">Balance: <span id="nav-balance-val">₹—</span></div>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
+    </div>
+  </nav>
+  <div class="mobile-nav-menu" id="mobile-nav-menu">
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="expenses.html">💸 Expenses</a>
+    <a href="budget.html">🎯 Budget</a>
+    <a href="savings.html">🏦 Savings</a>
+    <a href="reports.html">📈 Reports</a>
+    <a href="learn.html" class="active">🧠 Learn</a>
+  </div>
+
+  <div class="main-content">
+    <div class="page-container">
+
+      <!-- Hero -->
+      <div class="page-header text-center animate-in" style="padding:2rem 0 1rem">
+        <div class="hero-badge" style="display:inline-flex;margin-bottom:1rem">🎓 Financial Literacy for Gen-Z</div>
+        <h1>Learn to <span class="gradient-text">Invest</span> &amp; Grow</h1>
+        <p style="max-width:600px;margin:0.75rem auto 0">Understand mutual funds, SIPs, fixed deposits, and stocks. Start your investing journey while still in college — time is your biggest asset.</p>
+      </div>
+
+      <!-- Knowledge Cards -->
+      <div class="section-title animate-in mt-4"><div class="title-accent"></div>Investment Basics</div>
+      <div class="learn-grid animate-in">
+
+        <!-- Mutual Funds -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(124,58,237,0.3))">📊</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Beginner Friendly</div>
+            <h3>Mutual Funds</h3>
+            <p>A pool of money from many investors, managed by professional fund managers. Your money is invested across stocks, bonds, or both — spreading risk automatically.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>How it works:</strong> You buy "units" of a fund. As the fund's assets grow, so does your unit value (NAV).</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-income">Low Risk Options</span>
+              <span class="badge badge-savings">Diversified</span>
+              <span class="badge badge-books">₹500 Min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIP -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,212,255,0.2))">📅</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Best for Students</div>
+            <h3>SIP — Systematic Investment Plan</h3>
+            <p>Invest a fixed amount every month automatically. Even ₹500/month builds massive wealth over time thanks to compound interest. Perfect for students with limited income.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>Power of compounding:</strong> ₹1,000/month at 12% for 20 years = ₹9.9 lakhs invested → ₹39.9 lakhs returned!</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-income">Auto-debit</span>
+              <span class="badge badge-savings">Compounding</span>
+              <span class="badge badge-travel">₹100 Min SIP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Deposit -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(255,214,10,0.15),rgba(255,107,0,0.2))">🏛️</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Zero Risk</div>
+            <h3>Fixed Deposit (FD)</h3>
+            <p>Deposit money with a bank for a fixed period at a guaranteed interest rate. 100% safe. Ideal for parking emergency funds or short-term savings goals.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>Current rates:</strong> Banks offer 6.5%–7.5% per year on FDs. Some small finance banks offer up to 9%.</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-income">Guaranteed Returns</span>
+              <span class="badge badge-savings">DICGC Protected</span>
+              <span class="badge badge-stationery">Flexi FDs</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stocks -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(255,0,110,0.15),rgba(124,58,237,0.2))">📈</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Higher Risk / Higher Reward</div>
+            <h3>Stock Market</h3>
+            <p>Buy ownership (shares) in companies. When the company grows, your investment grows. High potential returns but also higher risk — requires research and patience.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>Start smart:</strong> Begin with index funds (Nifty 50, Sensex) before picking individual stocks.</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-entertainment">High Potential</span>
+              <span class="badge badge-food">Research Needed</span>
+              <span class="badge badge-other">Long Term</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PPF -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(0,212,255,0.2))">🔒</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Tax Saving</div>
+            <h3>PPF — Public Provident Fund</h3>
+            <p>Government-backed long-term savings (15 years). Earn ~7.1% interest, tax-free. Deposits qualify for Section 80C tax deduction. Best for building a retirement corpus early.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>Key benefit:</strong> All returns are completely tax-free — even at maturity. Start early for maximum benefit.</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-income">Tax Free</span>
+              <span class="badge badge-savings">Govt Guaranteed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Digital Gold -->
+        <div class="glass-card learn-card">
+          <div class="learn-card-thumb" style="background:linear-gradient(135deg,rgba(255,214,10,0.2),rgba(255,107,0,0.15))">🥇</div>
+          <div class="learn-card-body">
+            <div class="learn-tag">Alternative Asset</div>
+            <h3>Digital Gold &amp; SGBs</h3>
+            <p>Buy gold online in small amounts (as little as ₹1) via apps like PhonePe, Zerodha. Sovereign Gold Bonds (SGBs) also give 2.5% extra interest on top of gold price appreciation.</p>
+            <div class="tip-card" style="margin-bottom:0.75rem"><strong>Why gold?</strong> Acts as a hedge against inflation. Great for portfolio diversification alongside mutual funds.</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <span class="badge badge-other">Inflation Hedge</span>
+              <span class="badge badge-income">Liquid</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Video Learning -->
+      <div class="section-title animate-in mt-4"><div class="title-accent"></div>📺 Watch &amp; Learn</div>
+      <div class="grid-2 mb-4 animate-in">
+        <div class="glass-card card-p">
+          <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;font-size:1rem">SIP Calculator — Power of Compounding</h3>
+          <p class="text-sm text-muted mb-2">Understand how small monthly investments grow into lakhs over time.</p>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden">
+            <iframe class="video-embed" src="https://www.youtube.com/embed/MjeP5r3QTbI" title="SIP Compounding" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>
+        <div class="glass-card card-p">
+          <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;font-size:1rem">How Mutual Funds Work for Beginners</h3>
+          <p class="text-sm text-muted mb-2">A simple, animated explanation perfect for first-time investors.</p>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden">
+            <iframe class="video-embed" src="https://www.youtube.com/embed/iFSfC18Y2dg" title="Mutual Funds Basics" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIP Calculator -->
+      <div class="glass-card card-p mb-4 animate-in">
+        <div class="section-title"><div class="title-accent"></div>🔢 SIP Returns Calculator</div>
+        <div class="grid-2">
+          <div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Monthly SIP (₹)</label>
+                <input type="number" id="sip-amount" class="form-control" value="1000" min="100" oninput="calcSIP()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Duration (Years)</label>
+                <input type="number" id="sip-years" class="form-control" value="10" min="1" max="40" oninput="calcSIP()" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expected Annual Return (%)</label>
+              <input type="range" id="sip-rate" class="form-control" style="padding:8px 0" value="12" min="4" max="20" step="0.5" oninput="calcSIP();document.getElementById('sip-rate-val').textContent=this.value+'%'" />
+              <div class="flex-between text-sm" style="margin-top:4px"><span class="text-muted">4%</span><span class="font-bold text-cyan" id="sip-rate-val">12%</span><span class="text-muted">20%</span></div>
+            </div>
+          </div>
+          <div class="glass-card card-p" style="background:rgba(0,212,255,0.04);text-align:center;display:flex;flex-direction:column;justify-content:center;gap:1rem">
+            <div>
+              <div class="text-muted text-sm font-bold" style="text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Total Invested</div>
+              <div class="font-display font-bold" style="font-size:1.6rem;color:var(--text-secondary)" id="sip-invested">₹1,20,000</div>
+            </div>
+            <div>
+              <div class="text-muted text-sm font-bold" style="text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Returns Earned</div>
+              <div class="font-display font-bold" style="font-size:1.6rem;color:var(--green)" id="sip-returns">₹1,03,855</div>
+            </div>
+            <div style="height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:2px"></div>
+            <div>
+              <div class="text-muted text-sm font-bold" style="text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Final Value 🎉</div>
+              <div class="font-display font-bold" style="font-size:2.2rem" id="sip-final"><span class="gradient-text">₹2,23,855</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="glass-card card-p animate-in">
+        <div class="section-title"><div class="title-accent"></div>⚡ Quick Wisdom for Student Investors</div>
+        <div class="grid-3">
+          <div class="tip-card"><strong>Start Now, Not Later 🚀</strong><br>₹1,000/month from age 20 beats ₹5,000/month from age 30. Time is your unfair advantage.</div>
+          <div class="tip-card"><strong>Never Invest Emergency Money 🛡️</strong><br>Keep 3-6 months of expenses in an FD or savings account before you invest a single rupee.</div>
+          <div class="tip-card"><strong>Diversify Always 🎲</strong><br>Don't put all eggs in one basket. Split across FD, mutual funds, and a small equity allocation.</div>
+          <div class="tip-card"><strong>Avoid FOMO Investing 😤</strong><br>When everyone is talking about a stock, it's usually too late. Never invest based on social media hype.</div>
+          <div class="tip-card"><strong>Learn Before You Earn 📚</strong><br>Read "Let's Talk Money" by Monika Halan — the best personal finance book for young Indians.</div>
+          <div class="tip-card"><strong>Track Everything 📊</strong><br>You're already doing this with FinTrack! Awareness is the first step to financial freedom.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function calcSIP() {
+      const P = +document.getElementById('sip-amount').value || 1000;
+      const r = (+document.getElementById('sip-rate').value || 12) / 100 / 12;
+      const n = (+document.getElementById('sip-years').value || 10) * 12;
+      const total = P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+      const invested = P * n;
+      const returns = total - invested;
+      const fmt = v => '₹' + Math.round(v).toLocaleString('en-IN');
+      document.getElementById('sip-invested').textContent = fmt(invested);
+      document.getElementById('sip-returns').textContent = fmt(returns);
+      document.getElementById('sip-final').innerHTML = `<span class="gradient-text">${fmt(total)}</span>`;
+    }
+    document.addEventListener('DOMContentLoaded', calcSIP);
+  </script>
+</body>
+</html>
