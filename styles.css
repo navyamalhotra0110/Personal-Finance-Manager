@@ -88,12 +88,14 @@ img { max-width: 100%; display: block; }
   position: fixed; top: 0; left: 0; right: 0;
   height: var(--nav-h); z-index: 1000;
   display: flex; align-items: center;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
   background: rgba(7, 7, 15, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--glass-border);
   transition: var(--transition);
+  overflow: hidden; /* prevent ANY child from causing horizontal scroll */
+  gap: 0.75rem;
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -115,7 +117,13 @@ img { max-width: 100%; display: block; }
 .nav-links {
   display: flex; align-items: center; gap: 0.25rem;
   margin: 0 auto;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  flex-shrink: 1;
 }
+.nav-links::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 .nav-links a {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 14px; border-radius: var(--radius-sm);
@@ -836,8 +844,38 @@ select.form-control option {
   .hero-stats { justify-content: center; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* ── Nav overflow fixes — progressive collapse ── */
+
+/* ≤1200px: tighten nav link padding so links take less space */
+@media (max-width: 1200px) {
+  .nav-links a { padding: 8px 8px; font-size: 0.8rem; }
+  .nav-right { gap: 6px; }
+}
+
+/* ≤1050px: hide the balance chip */
+@media (max-width: 1050px) {
+  .nav-balance { display: none !important; }
+}
+
+/* ≤900px: collapse Profile + Logout to icon-only */
+@media (max-width: 900px) {
+  .nav-btn-label { display: none !important; }
+  #nav-profile-btn,
+  #nav-logout-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    min-width: 36px !important;
+  }
+  .nav-right { gap: 4px; }
+}
+
+/* ≤768px: hide desktop profile/logout (they're in mobile menu); keep nav-links scrollable */
 @media (max-width: 768px) {
-  .nav-links { display: none; }
+  #nav-profile-btn, #nav-logout-btn { display: none !important; }
+  .nav-balance { display: none !important; }
   .page-container { padding: 1.5rem 1rem; }
   .form-row { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -846,6 +884,26 @@ select.form-control option {
 @media (max-width: 480px) {
   .stat-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 2rem; }
+}
+
+/* Mobile menu profile/logout items */
+.mobile-nav-menu .mobile-profile-btn,
+.mobile-nav-menu .mobile-logout-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-weight: 500;
+  transition: var(--transition);
+  width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+}
+.mobile-nav-menu .mobile-profile-btn:hover { background: var(--glass-hover); color: var(--text-primary); }
+.mobile-nav-menu .mobile-logout-btn { color: var(--pink); }
+.mobile-nav-menu .mobile-logout-btn:hover { background: rgba(255,0,110,0.08); }
+.mobile-nav-divider {
+  height: 1px; background: var(--glass-border); margin: 0.5rem 0;
 }
 
 /* ── Mobile Nav ── */
@@ -885,7 +943,7 @@ select.form-control option {
   color: var(--text-primary);
 }
 @media (max-width: 768px) {
-  .mobile-nav-toggle { display: flex; }
+  .mobile-nav-toggle { display: none; }
 }
 
 /* ── Misc ── */
@@ -913,6 +971,175 @@ select.form-control option {
 .font-bold { font-weight: 700; }
 .w-full { width: 100%; }
 
+
+/* ══════════════════════════════════════════
+   LIGHT MODE
+   All overrides scoped to body.light-mode
+   ══════════════════════════════════════════ */
+body.light-mode {
+  --bg-primary:    #f0f2f8;
+  --bg-secondary:  #ffffff;
+  --bg-tertiary:   #e8ebf4;
+  --glass:         rgba(0, 0, 0, 0.03);
+  --glass-border:  rgba(0, 0, 0, 0.09);
+  --glass-hover:   rgba(0, 0, 0, 0.05);
+  --text-primary:  #0f0f1a;
+  --text-secondary:rgba(15, 15, 26, 0.65);
+  --text-muted:    rgba(15, 15, 26, 0.38);
+  --shadow-glow-cyan:   0 0 20px rgba(0, 150, 200, 0.15);
+  --shadow-glow-purple: 0 0 20px rgba(100, 50, 200, 0.15);
+  --shadow-glow-pink:   0 0 20px rgba(200, 0, 80, 0.12);
+}
+
+body.light-mode { background: var(--bg-primary); color: var(--text-primary); }
+
+/* Nav in light mode */
+body.light-mode .nav {
+  background: rgba(240, 242, 248, 0.85);
+  border-bottom-color: var(--glass-border);
+}
+
+/* Grid overlay — lighter in light mode */
+body.light-mode .grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 100, 180, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 100, 180, 0.04) 1px, transparent 1px);
+}
+
+/* Glass cards */
+body.light-mode .glass-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+body.light-mode .glass-card:hover {
+  border-color: rgba(0, 120, 180, 0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+/* Form controls */
+body.light-mode .form-control {
+  background: #f5f7fc;
+  border-color: rgba(0,0,0,0.12);
+  color: var(--text-primary);
+}
+body.light-mode .form-control:focus {
+  background: #ffffff;
+  border-color: var(--cyan);
+}
+body.light-mode select.form-control option {
+  background: #ffffff;
+  color: #0f0f1a;
+}
+
+/* Buttons */
+body.light-mode .btn-secondary {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.12);
+  color: var(--text-primary);
+}
+body.light-mode .btn-secondary:hover {
+  background: rgba(0,0,0,0.07);
+}
+
+/* Table */
+body.light-mode .data-table th { color: var(--text-muted); border-bottom-color: var(--glass-border); }
+body.light-mode .data-table td { border-bottom-color: rgba(0,0,0,0.04); }
+body.light-mode .data-table tr:hover td { background: rgba(0,0,0,0.02); }
+
+/* Filter buttons */
+body.light-mode .filter-btn {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+  color: var(--text-secondary);
+}
+body.light-mode .filter-btn:hover,
+body.light-mode .filter-btn.active {
+  background: rgba(0, 150, 220, 0.08);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* Nav links */
+body.light-mode .nav-links a { color: var(--text-secondary); }
+body.light-mode .nav-links a:hover,
+body.light-mode .nav-links a.active { color: var(--text-primary); background: rgba(0,0,0,0.05); }
+
+/* Stat glow orbs — tone down in light mode */
+body.light-mode .stat-card .glow-orb { opacity: 0.2; }
+
+/* Modal */
+body.light-mode .modal {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+/* Budget category items */
+body.light-mode .budget-category-item {
+  background: #f5f7fc;
+  border-color: rgba(0,0,0,0.08);
+}
+
+/* Tip cards */
+body.light-mode .tip-card {
+  background: rgba(0, 150, 220, 0.04);
+  border-left-color: var(--cyan);
+  color: var(--text-secondary);
+}
+
+/* Toast */
+body.light-mode .toast {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* Progress track */
+body.light-mode .progress-track {
+  background: rgba(0,0,0,0.08);
+}
+
+/* Scrollbar */
+body.light-mode::-webkit-scrollbar-track { background: #e8ebf4; }
+
+/* Nav balance */
+body.light-mode .nav-balance {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+}
+
+/* Hero gradient background — lighter */
+body.light-mode .hero-bg {
+  background:
+    radial-gradient(ellipse 60% 60% at 70% 50%, rgba(124,58,237,0.06), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 20% 80%, rgba(0,160,220,0.06), transparent 60%),
+    radial-gradient(ellipse 30% 30% at 80% 20%, rgba(200,0,80,0.04), transparent 60%);
+}
+
+/* Noise — reduce in light mode */
+body.light-mode .noise { opacity: 0.015; }
+
+/* Section title accent (keep coloured) */
+body.light-mode .section-title { color: var(--text-primary); }
+
+/* Mobile nav menu */
+body.light-mode .mobile-nav-menu {
+  background: rgba(240,242,248,0.97);
+  border-bottom-color: var(--glass-border);
+}
+body.light-mode .mobile-nav-menu a { color: var(--text-secondary); }
+body.light-mode .mobile-nav-menu a:hover,
+body.light-mode .mobile-nav-menu a.active { background: rgba(0,0,0,0.05); color: var(--text-primary); }
+
+/* Smooth transition when toggling */
+body, body * {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+/* But don't slow down animations that aren't theme-related */
+body .progress-fill, body canvas, body .modal { transition-property: width, opacity, transform; }
 
 /* ── Profile / Onboarding ── */
 #onboarding-modal .modal {
