@@ -27,7 +27,7 @@
       <a href="learn.html"><span class="nav-icon">🧠</span> Learn</a>
     </div>
     <div class="nav-right">
-      <a href="dashboard.html" class="btn btn-primary btn-sm">Open App →</a>
+      <a href="login.html" class="btn btn-primary btn-sm">Open App →</a>
       <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
     </div>
   </nav>
@@ -59,7 +59,7 @@
           FinTrack helps students manage pocket money, track expenses, set savings goals, and learn investing basics — all in one beautiful app. No more guessing where your money went.
         </p>
         <div class="hero-btns">
-          <a href="dashboard.html" class="btn btn-primary btn-lg">🚀 Get Started Free</a>
+          <a href="login.html" class="btn btn-primary btn-lg">🚀 Get Started Free</a>
           <a href="learn.html" class="btn btn-secondary btn-lg">🧠 Learn Finance</a>
         </div>
         <div class="hero-stats">
@@ -199,7 +199,7 @@
       <h2>Ready to Master <span class="gradient-text">Your Finances?</span></h2>
       <p>Join thousands of students building smart money habits today. Free, private, and works 100% in your browser.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-        <a href="dashboard.html" class="btn btn-primary btn-lg" style="animation:glow-pulse 3s infinite">🚀 Launch Dashboard</a>
+        <a href="login.html" class="btn btn-primary btn-lg" style="animation:glow-pulse 3s infinite">🚀 Launch Dashboard</a>
         <a href="learn.html" class="btn btn-secondary btn-lg">📚 Learn Finance First</a>
       </div>
     </div>
@@ -219,25 +219,45 @@
       <a href="learn.html" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">Learn</a>
     </div>
   </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
   <script>
-    // Update hero stats from localStorage
+    // Landing page: apply saved theme, no auth guard
     document.addEventListener('DOMContentLoaded', () => {
-      const goals = JSON.parse(localStorage.getItem('ft_goals') || '[]');
-      const expenses = JSON.parse(localStorage.getItem('ft_expenses') || '[]');
-      const now = new Date();
-      const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-      const monthExp = expenses.filter(e => e.date && e.date.startsWith(month));
-      const totalSaved = goals.reduce((s, g) => s + (g.saved || 0), 0);
-      const totalSpent = monthExp.reduce((s, e) => s + +e.amount, 0);
-      const fmt = n => '₹' + n.toLocaleString('en-IN');
-      document.getElementById('stat-savings').textContent = fmt(totalSaved);
-      document.getElementById('stat-goals').textContent = goals.length;
-      document.getElementById('stat-expenses').textContent = fmt(totalSpent);
+      // Theme toggle injection for landing page (nav-right has no profile/logout here)
+      const navRight = document.querySelector('.nav-right');
+      if (navRight && !document.getElementById('theme-toggle-btn')) {
+        const themeBtn = document.createElement('button');
+        themeBtn.id = 'theme-toggle-btn';
+        themeBtn.className = 'btn btn-secondary btn-sm btn-icon';
+        themeBtn.style.cssText = 'width:36px;height:36px;padding:0;font-size:1.1rem;border:1px solid var(--glass-border)';
+        themeBtn.onclick = () => Theme.toggle();
+        Theme.updateToggleBtn(Theme.get());
+        const toggle = document.getElementById('mobile-nav-toggle');
+        if (toggle) navRight.insertBefore(themeBtn, toggle);
+        else navRight.appendChild(themeBtn);
+      }
+
+      // Update hero stats using current user's data
+      const user = Auth.getUser();
+      const getKey = k => user ? `${user}_${k}` : k;
+      try {
+        const goals = JSON.parse(localStorage.getItem(getKey('goals')) || '[]');
+        const expenses = JSON.parse(localStorage.getItem(getKey('expenses')) || '[]');
+        const now = new Date();
+        const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const monthExp = expenses.filter(e => e.date && e.date.startsWith(month));
+        const totalSaved = goals.reduce((s, g) => s + (g.saved || 0), 0);
+        const totalSpent = monthExp.reduce((s, e) => s + +e.amount, 0);
+        const fmt = n => '₹' + n.toLocaleString('en-IN');
+        document.getElementById('stat-savings').textContent = fmt(totalSaved);
+        document.getElementById('stat-goals').textContent = goals.length;
+        document.getElementById('stat-expenses').textContent = fmt(totalSpent);
+      } catch(e) {}
+      // Note: Theme.init, initParticles, setActiveNav, initMobileNav, initScrollAnimations
+      // are all handled by app.js DOMContentLoaded — no need to call them again here.
     });
   </script>
-
-  
 </body>
 </html>
