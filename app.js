@@ -19,29 +19,133 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 const CURR_MONTH = new Date().getMonth();
 const CURR_YEAR  = new Date().getFullYear();
 
-/* ── LocalStorage Helpers ── */
+/* ── One-time cleanup of old global ft_ keys (pre-multi-user era) ── */
+(function cleanLegacyKeys() {
+  const legacyKeys = ['ft_expenses','ft_income','ft_goals','ft_budget','ft_profile','ft_seeded'];
+  legacyKeys.forEach(k => localStorage.removeItem(k));
+})();
+
+/* ══════════════════════════════════════════
+   STORAGE — Raw LocalStorage helpers
+   (No user prefix here — prefix is handled
+    by Auth.key() before every call)
+   ══════════════════════════════════════════ */
 const Store = {
-  get: (key, def = null) => {
+  get:    (key, def = null) => {
     try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
     catch { return def; }
   },
-  set: (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} },
-  remove: (key) => localStorage.removeItem(key),
+  set:    (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} },
+  remove: (key)      => { localStorage.removeItem(key); },
 };
 
-/* ── State ── */
-const state = {
-  get expenses()    { return Store.get('ft_expenses', []); },
-  set expenses(v)   { Store.set('ft_expenses', v); },
-  get budget()      { return Store.get('ft_budget', { total: 5000, cats: { food:1200, travel:600, books:400, entertainment:500, stationery:300, other:400 } }); },
-  set budget(v)     { Store.set('ft_budget', v); },
-  get goals()       { return Store.get('ft_goals', []); },
-  set goals(v)      { Store.set('ft_goals', v); },
-  get income()      { return Store.get('ft_income', []); },
-  set income(v)     { Store.set('ft_income', v); },
-  get profile()     { return Store.get('ft_profile', null); },
-  set profile(v)    { Store.set('ft_profile', v); },
+/* ══════════════════════════════════════════
+   AUTH — Per-user session management
+   Keys used:
+     ft_current_user      → currently logged-in username (global)
+     ft_users             → array of all known usernames  (global)
+     ft_theme             → light | dark                  (global)
+     {user}_expenses      → user's expense array
+     {user}_income        → user's income array
+     {user}_goals         → user's goals array
+     {user}_budget        → user's budget object
+     {user}_profile       → user's profile object
+     {user}_seeded        → boolean, demo data seeded flag
+   ══════════════════════════════════════════ */
+const Auth = {
+  /* Returns the sanitized current username or null */
+  getUser() {
+    return Store.get('ft_current_user', null);
+  },
+
+  /* Build a namespaced key for the current user */
+  key(suffix) {
+    const u = this.getUser();
+    if (!u) return suffix;           // fallback (login page context)
+    return `${u}_${suffix}`;
+  },
+
+  /* Log in: set current user + register in users list */
+  login(username) {
+    Store.set('ft_current_user', username);
+    const users = this.getAllUsers();
+    if (!users.includes(username)) {
+      users.push(username);
+      Store.set('ft_users', users);
+    }
+  },
+
+  /* Log out: clear current user, redirect to login */
+  logout() {
+    Store.remove('ft_current_user');
+    window.location.href = 'login.html';
+  },
+
+  /* Return all known usernames */
+  getAllUsers() {
+    return Store.get('ft_users', []);
+  },
+
+  /* Return profile object for any username (for login page preview) */
+  getUserProfile(username) {
+    return Store.get(`${username}_profile`, null);
+  },
+
+  /* Permanently delete all data for a username */
+  deleteUser(username) {
+    ['expenses','income','goals','budget','profile','seeded'].forEach(k => {
+      Store.remove(`${username}_${k}`);
+    });
+    const users = this.getAllUsers().filter(u => u !== username);
+    Store.set('ft_users', users);
+    if (this.getUser() === username) Store.remove('ft_current_user');
+  },
+
+  /* Guard: redirect to login if no user is logged in.
+     Call this at the top of DOMContentLoaded on every app page. */
+  guard() {
+    const pathname = window.location.pathname;
+    const isLoginPage   = pathname.endsWith('login.html');
+    const isLandingPage = pathname.endsWith('index.html') || pathname === '/' || pathname === '';
+    const user = this.getUser();
+    if (!user && !isLoginPage && !isLandingPage) {
+      window.location.href = 'login.html';
+      return false;
+    }
+    if (user && isLoginPage) {
+      window.location.href = 'dashboard.html';
+      return false;
+    }
+    return true;
+  },
 };
+
+/* ══════════════════════════════════════════
+   STATE — All reads/writes use Auth.key()
+   so every user gets their own isolated data
+   ══════════════════════════════════════════ */
+const DEFAULT_BUDGET = {
+  total: 5000,
+  cats: { food:1200, travel:600, books:400, entertainment:500, stationery:300, other:400 },
+};
+
+const state = {
+  get expenses()  { return Store.get(Auth.key('expenses'), []); },
+  set expenses(v) { Store.set(Auth.key('expenses'), v); },
+
+  get budget()    { return Store.get(Auth.key('budget'), DEFAULT_BUDGET); },
+  set budget(v)   { Store.set(Auth.key('budget'), v); },
+
+  get goals()     { return Store.get(Auth.key('goals'), []); },
+  set goals(v)    { Store.set(Auth.key('goals'), v); },
+
+  get income()    { return Store.get(Auth.key('income'), []); },
+  set income(v)   { Store.set(Auth.key('income'), v); },
+
+  get profile()   { return Store.get(Auth.key('profile'), null); },
+  set profile(v)  { Store.set(Auth.key('profile'), v); },
+};
+
 
 /* ══════════════════════════════════════════
    PROFILE & PERSONALIZATION SYSTEM
@@ -186,14 +290,20 @@ function confirmReset(type) {
 }
 
 function executeReset() {
+  const user = Auth.getUser();
   if (pendingResetType === 'full') {
-    localStorage.clear();
+    // Wipe all this user's data and log them out
+    Auth.deleteUser(user);
+    closeModal('reset-confirm-modal');
+    toast('All data deleted. Goodbye! 👋', 'info');
+    setTimeout(() => Auth.logout(), 900);
   } else {
-    ['ft_expenses','ft_income','ft_goals','ft_budget','ft_seeded'].forEach(k => Store.remove(k));
+    // Clear only financial data — keep profile & session
+    ['expenses','income','goals','budget','seeded'].forEach(k => Store.remove(`${user}_${k}`));
+    closeModal('reset-confirm-modal');
+    toast('Your data has been reset!', 'info');
+    setTimeout(() => location.reload(), 800);
   }
-  closeModal('reset-confirm-modal');
-  toast('Reset complete!', 'info');
-  setTimeout(() => location.reload(), 800);
 }
 
 function selectAvatar(btn) {
@@ -227,8 +337,7 @@ function saveProfile() {
   closeModal('onboarding-modal');
   document.body.style.overflow = '';
   applyProfile();
-  toast(`Welcome, ${name}! 🎉`, 'success');
-  seedDemoData();
+  toast(`Welcome, ${name}! 🎉 Your budget is set. Start adding expenses 💸`, 'success');
   setTimeout(() => { renderDashboard(); }, 200);
 }
 
@@ -251,7 +360,7 @@ function applyProfile() {
   // Nav avatar + name button
   const navProfile = $('nav-profile-btn');
   if (navProfile) {
-    navProfile.innerHTML = `<span style="font-size:1.2rem">${p.avatar}</span><span style="font-size:0.82rem;font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>`;
+    navProfile.innerHTML = `<span style="font-size:1.2rem">${p.avatar}</span><span class="nav-btn-label" style="font-size:0.82rem;font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>`;
   }
 
   // Dashboard greeting
@@ -282,19 +391,118 @@ function applyProfile() {
   });
 }
 
+/* ══════════════════════════════════════════
+   THEME SYSTEM — light / dark toggle
+   Saved globally in ft_theme (not per-user)
+   ══════════════════════════════════════════ */
+const Theme = {
+  STORAGE_KEY: 'ft_theme',
+
+  get() {
+    return Store.get(this.STORAGE_KEY, 'dark');
+  },
+
+  set(mode) {
+    Store.set(this.STORAGE_KEY, mode);
+    this.apply(mode);
+    this.updateToggleBtn(mode);
+  },
+
+  apply(mode) {
+    if (mode === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  },
+
+  toggle() {
+    const current = this.get();
+    this.set(current === 'dark' ? 'light' : 'dark');
+  },
+
+  init() {
+    this.apply(this.get());
+  },
+
+  updateToggleBtn(mode) {
+    const btn = $('theme-toggle-btn');
+    if (!btn) return;
+    const isDark = mode === 'dark';
+    btn.innerHTML  = isDark ? '☀️' : '🌙';
+    btn.title      = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    btn.style.background = isDark ? 'rgba(255,214,10,0.08)' : 'rgba(124,58,237,0.12)';
+    btn.style.borderColor = isDark ? 'rgba(255,214,10,0.25)' : 'rgba(124,58,237,0.3)';
+  },
+};
+
 function injectNavProfileBtn() {
   const navRight = document.querySelector('.nav-right');
   if (!navRight || $('nav-profile-btn')) return;
-  const btn = document.createElement('button');
-  btn.id = 'nav-profile-btn';
-  btn.className = 'btn btn-secondary btn-sm';
-  btn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px';
-  btn.innerHTML = `<span style="font-size:1.2rem">👤</span><span style="font-size:0.82rem;font-weight:600">Profile</span>`;
-  btn.onclick = () => { applyProfile(); openModal('profile-modal'); };
+
+  // ── Theme Toggle Button ──
+  const themeBtn = document.createElement('button');
+  themeBtn.id = 'theme-toggle-btn';
+  themeBtn.className = 'btn btn-secondary btn-sm btn-icon';
+  themeBtn.title = 'Toggle Theme';
+  themeBtn.style.cssText = 'width:36px;height:36px;padding:0;font-size:1.1rem;border:1px solid var(--glass-border);transition:all 0.3s ease;flex-shrink:0';
+  themeBtn.onclick = () => Theme.toggle();
+  Theme.updateToggleBtn(Theme.get());
+
+  // ── Profile Button ──
+  const profileBtn = document.createElement('button');
+  profileBtn.id = 'nav-profile-btn';
+  profileBtn.className = 'btn btn-secondary btn-sm';
+  profileBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;flex-shrink:0';
+  profileBtn.innerHTML = `<span style="font-size:1.2rem">👤</span><span class="nav-btn-label" style="font-size:0.82rem;font-weight:600">Profile</span>`;
+  profileBtn.onclick = () => { applyProfile(); openModal('profile-modal'); };
+
+  // ── Logout Button ──
+  const logoutBtn = document.createElement('button');
+  logoutBtn.id = 'nav-logout-btn';
+  logoutBtn.className = 'btn btn-danger btn-sm';
+  logoutBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;font-weight:600;flex-shrink:0';
+  logoutBtn.innerHTML = `<span>🚪</span><span class="nav-btn-label" style="font-size:0.82rem">Logout</span>`;
+  logoutBtn.onclick = () => {
+    if (confirm(`Log out of "${Auth.getUser()}"?`)) Auth.logout();
+  };
+
   // Insert before mobile toggle
   const toggle = $('mobile-nav-toggle');
-  if (toggle) navRight.insertBefore(btn, toggle);
-  else navRight.appendChild(btn);
+  if (toggle) {
+    navRight.insertBefore(themeBtn, toggle);
+    navRight.insertBefore(profileBtn, toggle);
+    navRight.insertBefore(logoutBtn, toggle);
+  } else {
+    navRight.append(themeBtn, profileBtn, logoutBtn);
+  }
+
+  // ── Also inject Profile + Logout into mobile hamburger menu ──
+  const mobileMenu = $('mobile-nav-menu');
+  if (mobileMenu) {
+    const divider = document.createElement('div');
+    divider.className = 'mobile-nav-divider';
+
+    const mobileProfileBtn = document.createElement('button');
+    mobileProfileBtn.className = 'mobile-profile-btn';
+    mobileProfileBtn.innerHTML = `⚙️ Profile & Settings`;
+    mobileProfileBtn.onclick = () => {
+      mobileMenu.classList.remove('open');
+      applyProfile();
+      openModal('profile-modal');
+    };
+
+    const mobileLogoutBtn = document.createElement('button');
+    mobileLogoutBtn.className = 'mobile-logout-btn';
+    mobileLogoutBtn.innerHTML = `🚪 Logout`;
+    mobileLogoutBtn.onclick = () => {
+      if (confirm(`Log out of "${Auth.getUser()}"?`)) Auth.logout();
+    };
+
+    mobileMenu.appendChild(divider);
+    mobileMenu.appendChild(mobileProfileBtn);
+    mobileMenu.appendChild(mobileLogoutBtn);
+  }
 }
 
 /* ── Utilities ── */
@@ -421,7 +629,8 @@ function updateNavBalance() {
   if (!el) return;
   const bud = state.budget;
   const spent = totalExpenses(getMonthExpenses());
-  el.textContent = fmt(bud.total - spent);
+  const inc = totalIncome();
+  el.textContent = fmt(bud.total + inc - spent);
 }
 
 /* ── Mobile Nav ── */
@@ -1065,32 +1274,9 @@ function formatDate(dateStr) {
 }
 
 /* ── Seed Demo Data ── */
-function seedDemoData() {
-  if (Store.get('ft_seeded')) return;
-  const now = new Date();
-  const exps = [];
-  const demoData = [
-    { cat:'food', desc:'Canteen lunch', amt:120 }, { cat:'food', desc:'Snacks', amt:60 },
-    { cat:'travel', desc:'Bus pass', amt:350 }, { cat:'travel', desc:'Rickshaw', amt:80 },
-    { cat:'books', desc:'Python textbook', amt:450 }, { cat:'stationery', desc:'Notebooks', amt:180 },
-    { cat:'entertainment', desc:'Netflix', amt:199 }, { cat:'food', desc:'Pizza', amt:299 },
-    { cat:'books', desc:'Reference book', amt:320 }, { cat:'other', desc:'Misc', amt:150 },
-  ];
-  demoData.forEach((d, i) => {
-    const date = new Date(now.getFullYear(), now.getMonth(), Math.max(1, now.getDate() - i * 2));
-    exps.push({ id: uid(), description: d.desc, amount: d.amt, category: d.cat, date: date.toISOString().split('T')[0] });
-  });
-  state.expenses = exps;
-  const inc = [{ id: uid(), source: 'Pocket Money', amount: 3000, date: `${getCurrentMonth()}-01` }];
-  state.income = inc;
-  const goals = [
-    { id: uid(), name: 'New Laptop', emoji: '💻', target: 50000, saved: 12000, deadline: `${CURR_YEAR + 1}-06-30`, color: 'cyan', createdAt: today() },
-    { id: uid(), name: 'Exam Fees', emoji: '🎓', target: 8000, saved: 5500, deadline: `${CURR_YEAR}-12-31`, color: 'purple', createdAt: today() },
-    { id: uid(), name: 'Trip to Manali', emoji: '🏔️', target: 15000, saved: 3200, deadline: `${CURR_YEAR + 1}-05-01`, color: 'green', createdAt: today() },
-  ];
-  state.goals = goals;
-  Store.set('ft_seeded', true);
-}
+/* seedDemoData intentionally removed.
+   Every new user starts with a clean slate —
+   only the budget total they set during onboarding is pre-filled. */
 
 /* ══════════════════════════════════════════
    INCOME MANAGEMENT
@@ -1168,12 +1354,20 @@ window.updateCatBudget = updateCatBudget;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.closeAllModals = closeAllModals;
+window.renderLineChart = renderLineChart;
 
 /* ── Init on DOM ready ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject profile/reset modals into every page
+  // ① Apply saved theme immediately (before any render)
+  Theme.init();
+
+  // ② Auth guard — redirect to login if not logged in
+  if (!Auth.guard()) return;   // guard() handles the redirect itself
+
+  // ③ Inject profile/reset modals + nav buttons
   injectProfileModal();
   injectNavProfileBtn();
+  Theme.updateToggleBtn(Theme.get()); // sync button icon after injection
 
   initParticles();
   setActiveNav();
@@ -1185,14 +1379,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.classList.contains('modal-overlay')) closeAllModals();
   });
 
-  // Check profile — show onboarding if first visit
-  const profile = state.profile;
-  if (!profile) {
-    // First time: show onboarding, skip demo seed until after
+  // Returning user — restore their profile and balance
+  // Guard: only run profile logic when a real user is logged in
+  const currentUser = Auth.getUser();
+  const profile = currentUser ? state.profile : null;
+  if (currentUser && !profile) {
     openModal('onboarding-modal');
-  } else {
-    // Returning user
-    seedDemoData();
+  } else if (profile) {
     applyProfile();
     updateNavBalance();
   }
@@ -1207,9 +1400,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── Expose extras to global ── */
-window.saveProfile    = saveProfile;
-window.updateProfile  = updateProfile;
-window.selectAvatar   = selectAvatar;
+window.saveProfile      = saveProfile;
+window.updateProfile    = updateProfile;
+window.selectAvatar     = selectAvatar;
 window.selectEditAvatar = selectEditAvatar;
-window.confirmReset   = confirmReset;
-window.executeReset   = executeReset;
+window.confirmReset     = confirmReset;
+window.executeReset     = executeReset;
+window.Auth             = Auth;
+window.Theme            = Theme;
